@@ -9,6 +9,8 @@ set expandtab
 nmap <F4> :w<CR>:! jslint --white --node %<CR>
 nmap <F4> :w<CR>:make<CR>:cw<CR>
 
+noremap <silent> ]l :lnext<CR>
+noremap <silent> [l :lprev<CR>
 noremap <silent> ]q :cnext<CR>
 noremap <silent> [q :cprev<CR>
 noremap <silent> [Q :cfirst<CR>
@@ -25,32 +27,6 @@ endif
 
 set background=light
 
-function! SaveOldMake()
-  let s:oldmake = &makeprg
-  let s:olderrformat=&errorformat
-endfunction
-
-function! RestoreOldMake()
-  let &makeprg=s:oldmake
-  set errorformat=s:olderrformat
-endfunction
-
-function! SetMavenErrorFormat()
-  set errorformat=[ERROR]\ %f:[%l\\,%v]\ %m
-endfunction
-
-function! TestThisFile()
-  call SaveOldMake()
-  call SetMavenErrorFormat()
-  let &makeprg="mvn -Dtest=%:t:r test"
-  make
-  call RestoreOldMake()
-endfunction
-
-function! EnableTests()
-  nmap <F5> :call TestThisFile()<CR>
-endfunction
-
 "<Leader>n breaks apart the quote
 :nmap <Leader>n i" +<CR>"<ESC>
 :nmap <Leader>N i' +<CR>'<ESC>
@@ -63,8 +39,9 @@ endfunction
 set wildignore+=*/target/*
 set wildignore+=*/reveal-javaweb/bin/*
 set wildignore+=*/bin/*
+set wildignore+=*.class
 let g:ctrlp_working_path_mode = 'r'
-let g:ctrlp_custom_ignore = {'dir':'\v[\/](node_modules|bower_components|target|build|dist|bin)$'}
+let g:ctrlp_custom_ignore = {'dir':'\v[\/](node_modules|target|build|bin)$'}
 
 highlight ColorColumn ctermbg=magenta
 highlight ColorColumn guibg=magenta
@@ -85,6 +62,32 @@ endif
 set ruler
 set relativenumber
 
-set backspace=2
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
 
+if filereadable(glob('./.vimrc.local'))
+  so ./.vimrc.local
+endif
+
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_loc_list_height = 5
+let g:syntastic_auto_loc_list = 0
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 1
+let g:syntastic_javascript_checkers = ['eslint']
+
+let g:syntastic_error_symbol = '❌'
+let g:syntastic_style_error_symbol = '⁉️'
+let g:syntastic_warning_symbol = '⚠️'
+let g:syntastic_style_warning_symbol = '💩'
+
+highlight link SyntasticErrorSign SignColumn
+highlight link SyntasticWarningSign SignColumn
+highlight link SyntasticStyleErrorSign SignColumn
+highlight link SyntasticStyleWarningSign SignColumn
 
